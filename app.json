@@ -38,6 +38,13 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you encrypt/decrypt them.",
+          "cameraPermission": "The app accesses your camera to let you make a photo to encrypt."
+        }
       ]
     ],
     "experiments": {
