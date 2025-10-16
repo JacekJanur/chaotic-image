@@ -1,5 +1,6 @@
 import { scrambleImageBase64, unscrambleImageBase64 } from '@/utils/chaoticImage';
 import { pickImageDialog } from '@/utils/pickImage';
+import { requireNativeModule } from 'expo';
 import React, { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ImagePreviewModal from './ImagePreviewModal';
@@ -29,17 +30,26 @@ const MainActions = () => {
   };
 
   const handleUnscramble = async () => {
+
     const base64 = await pickImageDialog({
       title: 'Unscramble Image',
       message: 'Select image to restore order',
       options: ['gallery'],
     });
 
-    if (base64) {
-      setSelectedImageBase64(base64);
-      setCurrentAction('unscramble');
-      setIsPreviewVisible(true);
-    }
+    // Pobranie modułu natywnego
+    const ChaosNative = requireNativeModule('ChaosNative');
+
+    // 1️⃣ Wyświetlamy stałą PI w konsoli
+    console.log('Native PI:', ChaosNative.PI);
+
+
+
+    // if (base64) {
+    //   setSelectedImageBase64(base64);
+    //   setCurrentAction('unscramble');
+    //   setIsPreviewVisible(true);
+    // }
   };
 
   const handleClose = () => {

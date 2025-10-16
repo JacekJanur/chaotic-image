@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["ChaosNativeModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.chaosnative.ChaosNativeModule"]
+  }
+}
