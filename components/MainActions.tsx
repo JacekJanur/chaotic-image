@@ -30,7 +30,6 @@ const MainActions = () => {
   };
 
   const handleUnscramble = async () => {
-
     const base64 = await pickImageDialog({
       title: 'Unscramble Image',
       message: 'Select image to restore order',
@@ -42,8 +41,6 @@ const MainActions = () => {
 
     // 1️⃣ Wyświetlamy stałą PI w konsoli
     console.log('Native PI:', ChaosNative.PI);
-
-
 
     // if (base64) {
     //   setSelectedImageBase64(base64);
@@ -126,12 +123,33 @@ const MainActions = () => {
 export default MainActions;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff', padding: 24 },
-  button: { width: '100%', paddingVertical: 14, borderRadius: 10, marginVertical: 8, alignItems: 'center' },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 24,
+  },
+  button: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 10,
+    marginVertical: 8,
+    alignItems: 'center',
+  },
   primary: { backgroundColor: '#355a7a' },
   primaryText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   secondary: { backgroundColor: '#fff', borderWidth: 2, borderColor: '#355a7a' },
   secondaryText: { color: '#355a7a', fontSize: 16, fontWeight: '600' },
-  loadingOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.7)' },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.7)',
+  },
   loadingText: { marginTop: 12, fontSize: 16, color: '#355a7a' },
 });
