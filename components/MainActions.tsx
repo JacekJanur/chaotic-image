@@ -1,10 +1,10 @@
 import { scrambleImageBase64, unscrambleImageBase64 } from '@/utils/chaoticImage';
 import { pickImageDialog } from '@/utils/pickImage';
-import { requireNativeModule } from 'expo';
 import React, { useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ImagePreviewModal from './ImagePreviewModal';
 import PasswordDialog from './PasswordDialog';
+import ResultScreen from './ResultScreen';
 
 type ActionType = 'scramble' | 'unscramble';
 
@@ -12,9 +12,11 @@ const MainActions = () => {
   const [selectedImageBase64, setSelectedImageBase64] = useState<string | null>(null);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [isPasswordDialogVisible, setIsPasswordDialogVisible] = useState(false);
-  const [password, setPassword] = useState('');
   const [currentAction, setCurrentAction] = useState<ActionType | null>(null);
-  const [loading, setLoading] = useState(false);
+
+  const [isResultVisible, setIsResultVisible] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [resultBase64, setResultBase64] = useState<string | null>(null);
 
   const handleScramble = async () => {
     const base64 = await pickImageDialog({
@@ -36,25 +38,17 @@ const MainActions = () => {
       options: ['gallery'],
     });
 
-    // Pobranie modułu natywnego
-    const ChaosNative = requireNativeModule('ChaosNative');
-
-    // 1️⃣ Wyświetlamy stałą PI w konsoli
-    console.log('Native PI:', ChaosNative.PI);
-
-    // if (base64) {
-    //   setSelectedImageBase64(base64);
-    //   setCurrentAction('unscramble');
-    //   setIsPreviewVisible(true);
-    // }
+    if (base64) {
+      setSelectedImageBase64(base64);
+      setCurrentAction('unscramble');
+      setIsPreviewVisible(true);
+    }
   };
 
   const handleClose = () => {
     setIsPreviewVisible(false);
     setSelectedImageBase64(null);
     setCurrentAction(null);
-    setPassword('');
-    setLoading(false);
   };
 
   const handleContinue = () => {
@@ -63,37 +57,65 @@ const MainActions = () => {
 
   const handlePasswordSubmit = async (submittedPassword: string) => {
     if (!selectedImageBase64 || !currentAction) return;
+
     setIsPasswordDialogVisible(false);
-    setLoading(true);
+    setIsPreviewVisible(false);
+    setIsProcessing(true);
+    setIsResultVisible(true);
 
     try {
-      let resultBase64: string;
+      let result: string;
+
       if (currentAction === 'scramble') {
-        resultBase64 = await scrambleImageBase64(selectedImageBase64, submittedPassword);
+        result = await scrambleImageBase64(selectedImageBase64, submittedPassword);
       } else {
-        resultBase64 = await unscrambleImageBase64(selectedImageBase64, submittedPassword);
+        result = await unscrambleImageBase64(selectedImageBase64, submittedPassword);
       }
+
+      setResultBase64(result);
+      setIsProcessing(false);
     } catch (err) {
       console.error('Processing failed:', err);
-    } finally {
-      setLoading(false);
+      setIsProcessing(false);
+      setIsResultVisible(false);
+
+      Alert.alert(
+        'Processing Failed',
+        err instanceof Error ? err.message : 'An unknown error occurred',
+        [{ text: 'OK' }],
+      );
     }
   };
 
   const handlePasswordCancel = () => {
     setIsPasswordDialogVisible(false);
-    setPassword('');
+  };
+
+  const handleResultClose = () => {
+    setIsResultVisible(false);
+    setResultBase64(null);
+    setSelectedImageBase64(null);
+    setCurrentAction(null);
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={[styles.button, styles.primary]} onPress={handleScramble}>
+      <View style={styles.content}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Chaotic Image Encryptor</Text>
+          <Text style={styles.description}>
+            Secure your images with chaos theory-based encryption
+          </Text>
+        </View>
+
+           <TouchableOpacity style={[styles.button, styles.primary]} onPress={handleScramble}>
         <Text style={styles.primaryText}>Scramble Image</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={[styles.button, styles.secondary]} onPress={handleUnscramble}>
         <Text style={styles.secondaryText}>Unscramble Image</Text>
       </TouchableOpacity>
+      </View>
 
       <ImagePreviewModal
         visible={isPreviewVisible}
@@ -110,12 +132,13 @@ const MainActions = () => {
         onCancel={handlePasswordCancel}
       />
 
-      {loading && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#355a7a" />
-          <Text style={styles.loadingText}>Processing...</Text>
-        </View>
-      )}
+      <ResultScreen
+        visible={isResultVisible}
+        processing={isProcessing}
+        resultBase64={resultBase64}
+        action={currentAction}
+        onClose={handleResultClose}
+      />
     </View>
   );
 };
@@ -125,31 +148,75 @@ export default MainActions;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
+  },
+  content: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
     padding: 24,
+  },
+  titleContainer: {
+    marginBottom: 40,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#355a7a',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  description: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    paddingHorizontal: 20,
   },
   button: {
     width: '100%',
-    paddingVertical: 14,
-    borderRadius: 10,
+    paddingVertical: 20,
+    borderRadius: 12,
     marginVertical: 8,
     alignItems: 'center',
   },
-  primary: { backgroundColor: '#355a7a' },
-  primaryText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  secondary: { backgroundColor: '#fff', borderWidth: 2, borderColor: '#355a7a' },
-  secondaryText: { color: '#355a7a', fontSize: 16, fontWeight: '600' },
-  loadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.7)',
+  buttonIcon: {
+    fontSize: 32,
+    marginBottom: 8,
   },
-  loadingText: { marginTop: 12, fontSize: 16, color: '#355a7a' },
+  primary: {
+    backgroundColor: '#355a7a',
+    shadowColor: '#355a7a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  primaryText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  secondary: {
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#355a7a',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  secondaryText: {
+    color: '#355a7a',
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  buttonDescription: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 2,
+  },
 });

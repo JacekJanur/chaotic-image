@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "chaos-image",
-    "slug": "chaos-image",
+    "slug": "chaotic-image",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -55,6 +55,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e9f5ca85-d23b-46a9-8879-1614ca18f544"
+      }
+    },
+    "owner": "jacekj-org"
   }
 }
